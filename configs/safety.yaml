@@ -1,0 +1,9 @@
+meta_train_tasks:
+- liar
+- hatecheck
+- tweet_eval
+- sarcasm
+
+meta_test_tasks:
+- ethos
+- antropic_harmless

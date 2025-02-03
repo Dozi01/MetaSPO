@@ -1,0 +1,26 @@
+base_model_setting:
+  model_type: '' # specified in main.sh
+  model_name: ''
+  temperature: 0.0
+  api_key: 'Your_API_Key'
+
+optim_model_setting:
+  model_type: openai
+  model_name: gpt-4o-mini
+  temperature: 1.0
+  api_key: 'Your_API_Key' 
+
+search_setting:
+  method: null
+  iteration: 3
+  num_candidates: 3
+  top_k: 3
+
+task_setting:
+  train_size: 50
+  eval_size: 50 
+  test_size: 500
+  seed: 42 # if need to fixed shuffled dataset
+  data_dir: ./datasets
+  prompt_file_path : './prompts/task_initial_prompts.json'
+  initial_user_prompt: 'human'

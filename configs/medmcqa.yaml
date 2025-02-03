@@ -1,0 +1,11 @@
+meta_train_tasks:
+- ob_gyn
+- medicine
+- pharmacology
+- pathology
+
+meta_test_tasks:
+- dental
+- anatomy
+- surgery
+- pediatrics

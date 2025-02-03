@@ -1,0 +1,11 @@
+meta_train_tasks:
+- logic_grid_puzzle
+- tracking_shuffled_objects
+- logical_deduction
+- temporal_sequences
+
+meta_test_tasks:
+- object_counting
+- reasoning_colored_objects
+- epistemic
+

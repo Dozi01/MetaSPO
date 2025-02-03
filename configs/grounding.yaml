@@ -1,0 +1,10 @@
+meta_train_tasks:
+- squad
+- hotpot_qa
+- trivia_qa
+- drop
+
+meta_test_tasks:
+- natural_questions
+- web_qa
+

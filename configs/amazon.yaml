@@ -1,0 +1,10 @@
+meta_train_tasks:
+- beauty
+- game
+- baby
+- office
+
+meta_test_tasks:
+- electronics
+- pet
+- sports
