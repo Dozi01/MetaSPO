@@ -1,58 +1,35 @@
-# Bilevel System Prompt Optimization with Meta-Learning
-![Method](asset/main_fig.jpg)
+# System Prompt Optimization with Meta-Learning
+[![Paper](https://img.shields.io/badge/arXiv-2412.02186-b31b1b)]()
+[![Python](https://img.shields.io/badge/Python-3.10%2B-orange)](https://www.python.org/downloads/release/python-310s0/)
+[![GCC](https://img.shields.io/badge/gcc-9.1%2B-blue)](https://gcc.gnu.org/gcc-9/)
+
+![MetaSPO](asset/main_fig.jpg)
 
 ## Abstract
 Large Language Models (LLMs) have shown remarkable capabilities, with optimizing their input prompts playing a pivotal role in maximizing their performance. Yet, while LLM prompts consist of both the task-agnostic system prompts and task-specific user prompts, existing work on prompt optimization has focused on user prompts specific to individual queries or tasks, and largely overlooked the system prompt that is, once optimized, applicable across different tasks and domains. Motivated by this, we introduce the novel problem of bilevel system prompt optimization, whose objective is to design system prompts that are robust to diverse user prompts and transferable to unseen tasks. To tackle this problem, we propose a meta-learning framework, which meta-learns the system prompt by optimizing it over various user prompts across multiple datasets, while simultaneously updating the user prompts in an iterative manner to ensure synergy between them. We conduct experiments on 14 unseen datasets spanning 5 different domains, on which we show that our approach produces system prompts that generalize effectively to diverse user prompts. Also, our findings reveal that the optimized system prompt enables rapid adaption even to unseen tasks, requiring fewer optimization steps for test-time user prompts while achieving improved performance.
 
 ## Overview
-This repository provides an implementation of **Meta-level System Prompt Optimization (MetaSPO)**, a meta-learning approach for optimizing system prompts for Large Language Models (LLMs). The method focuses on improving system prompts that are robust to diverse user prompts and transferable across different tasks and domains.
+This repository provides an implementation of **Meta-level System Prompt Optimizer (MetaSPO)**, a meta-learning approach for optimizing system prompts for Large Language Models (LLMs). MetaSPO focuses on improving system prompts 
+that are robust to diverse user prompts and transferable across different tasks and domains.
 
-## Installation
 
+## Running MetaSPO
+### Installation
 Install dependencies using:
 ```bash
-conda create -n metaspo python=3.9 
+conda create -n metaspo python=3.10 
 conda activate metaspo
 pip install -r requirements.txt
 ```
+Ensure your OPENAI_API_KEY is stored in the .env file.
 
-## Usage
-
-### Running MetaSPO Training
-To train the system prompt using MetaSPO, run the following command:
+### MetaSPO: Training and Evaluation
 ```bash
-python meta_train.py --config "configs/$DOMAIN.yaml" --init_system_prompt_path "./prompts/default.json" --log_dir $LOG_DIR --method 'metaspo'
+./main.sh
 ```
-This will save the optimized system prompt in $LOG_DIR/bilevel_nodes_0.json (last node)
+Refer to `main.sh` for detailed instructions.
 
-### Unseen Generalization
-After training, evaluate the optimized system prompt on 10 unoptimized user prompts:
-```bash
-python meta_test.py \
-  --config "configs/$DOMAIN.yaml" \
-  --init_system_prompt_path "logs/$MODEL_NAME/metaspo/$DOMAIN/bilevel_nodes_0.json" \
-  --log_dir "logs/$MODEL_NAME/metaspo/$DOMAIN" \
-  --method 'unseen_generalization'
-```
 
-### Test-Time Adaptation
-For test-time adaptation experiment, run:
-```bash
-python meta_test.py \
-  --config "configs/$DOMAIN.yaml" \
-  --init_system_prompt_path "logs/$MODEL_NAME/metaspo/$DOMAIN/bilevel_nodes_0.json" \
-  --log_dir "logs/$MODEL_NAME/metaspo/$DOMAIN" \
-  --method 'apo' \
-  --iteration 6
-```
-
-## Configuration
-Modify `configs/$DOMAIN.yaml` to set dataset configurations. \
-
-'''
-    "ethos":{
-        "cot_prompt" : "",
-        "human_prompt" : "Is the following text hate speech?",
-        "suffix" : "<Question>{question}</Question>\nAt the end present your answer in <answer>yes</answer> or <answer>no</answer>."
-    },
-'''
+### Tasks
+Modify `configs/$DOMAIN.yaml` to set dataset configurations.
+To implement new tasks, include the task name in `srt/tasks/__init__.py` and implement a corresponding task class.
