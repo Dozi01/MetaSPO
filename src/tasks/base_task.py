@@ -92,12 +92,12 @@ class BaseTask(ABC):
 
     @abstractmethod
     def clean_response(self, response):
+        '''
+        Clean the response from the model.
+        '''
         pass
 
     def batch_clean_responses(self, responses):
-        """
-        Extract preds from responses.
-        """
         if not isinstance(responses, list):
             responses = list(responses)
 
@@ -106,4 +106,7 @@ class BaseTask(ABC):
 
     @abstractmethod
     def _get_task_initial_prompt(self):
+        '''
+        Get the initial prompt for the task.
+        '''
         pass

@@ -1,7 +1,6 @@
 # define task prompts for various datasets
 from .base_task import BaseTask
 import re
-import numpy as np
 
 
 class Amazon(BaseTask):
@@ -52,9 +51,3 @@ class Amazon(BaseTask):
             return -1
         else:
             return int(digits[0])
-
-    def cal_metric(self, preds, labels):
-        correct = self.cal_correct(preds=preds, labels=labels)
-        accuracy = np.mean(correct)
-
-        return accuracy

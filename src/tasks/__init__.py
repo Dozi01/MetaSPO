@@ -1,21 +1,6 @@
 import importlib
 
-GROUNDING_TASKS = [
-    "hotpot_qa",
-    "natural_questions",
-    "squad",
-    "web_qa",
-    "drop",
-    "trivia_qa",
-]
-SAFETY_TASKS = [
-    "ethos",
-    "liar",
-    "hatecheck",
-    "sarcasm",
-    "tweet_eval",
-    "antropic_harmless",
-]
+# Add your new benchmark here with task names.
 MEDMCQA_TASKS = [
     "anatomy",
     "surgery",
@@ -26,9 +11,7 @@ MEDMCQA_TASKS = [
     "pediatrics",
     "pathology",
 ]
-
 AMAZON_TASKS = ["beauty", "game", "baby", "office", "sports", "electronics", "pet"]
-
 BIGBENCH_TASKS = [
     "logic_grid_puzzle",
     "logical_deduction",
@@ -38,6 +21,22 @@ BIGBENCH_TASKS = [
     "reasoning_colored_objects",
     "epistemic",
     "navigate",
+]
+SAFETY_TASKS = [
+    "ethos",
+    "liar",
+    "hatecheck",
+    "sarcasm",
+    "tweet_eval",
+    "antropic_harmless",
+]
+GROUNDING_TASKS = [
+    "hotpot_qa",
+    "natural_questions",
+    "squad",
+    "web_qa",
+    "drop",
+    "trivia_qa",
 ]
 
 
