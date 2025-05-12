@@ -1,4 +1,5 @@
 import importlib
+from .base_task import BaseTask
 
 # Add your new benchmark here with task names.
 MEDMCQA_TASKS = [
