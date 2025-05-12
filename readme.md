@@ -1,5 +1,5 @@
 # System Prompt Optimization with Meta-Learning
-[![Paper](https://img.shields.io/badge/arXiv-2412.02186-b31b1b)]()
+[![Paper](https://img.shields.io/badge/arXiv-2505)]()
 [![Python](https://img.shields.io/badge/Python-3.10%2B-orange)](https://www.python.org/downloads/release/python-310s0/)
 [![GCC](https://img.shields.io/badge/gcc-9.1%2B-blue)](https://gcc.gnu.org/gcc-9/)
 
@@ -15,9 +15,7 @@ that are robust to diverse user prompts and transferable across different tasks 
 
 ## Running MetaSPO
 ### Installation
-Install dependencies using:
 ```bash
-git clone https://github.com/Dozi01/MetaSPO.git
 cd MetaSPO
 conda create -n metaspo python=3.10 -y
 conda activate metaspo
@@ -33,5 +31,5 @@ Refer to `main.sh` for detailed instructions.
 
 
 ### Tasks
-Modify `configs/$DOMAIN.yaml` to set dataset configurations.
+Modify `configs/$DOMAIN.yaml` to set dataset configurations.  
 To implement new tasks, include the task name in `srt/tasks/__init__.py` and implement a corresponding task class.
