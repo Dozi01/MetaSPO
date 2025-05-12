@@ -19,7 +19,6 @@ class MetaSPOAPE(MetaSPO):
         num_candidate=9,
         iteration=3,
         beam_width=3,
-        additional_inner_loop: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(
@@ -33,7 +32,6 @@ class MetaSPOAPE(MetaSPO):
             iteration,
             num_candidate,
             beam_width,
-            additional_inner_loop,
             **kwargs,
         )
 
@@ -48,7 +46,6 @@ class MetaSPOAPE(MetaSPO):
         self.all_greater = False
         self.beam_cut = True
         self.iteration = iteration
-        self.additional_inner_loop = additional_inner_loop
         self.beam_width = beam_width
         self.log_dir = log_dir
 

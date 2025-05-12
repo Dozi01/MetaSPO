@@ -1,49 +1,41 @@
 # define task prompts for various datasets
-from .base_task import BaseDataset, BaseTask
+from .base_task import BaseTask
 import re
-import string
-import os
-import json
-from datasets import load_dataset
 import numpy as np
-from sklearn.metrics import (
-    f1_score,
-    classification_report,
-)
 
 
 class Amazon(BaseTask):
     def __init__(
         self,
         train_size,
-        eval_size,
         test_size,
         task_name: str,
         benchmark="amazon",
         task_description="Amazon review analysis benchmark",
         data_dir="",
         seed=None,
-        TaskDataset=BaseDataset,
-        f1_metric=False,
         **kwargs,
     ):
         self.options = {}
         self.benchmark = benchmark
-        self.f1_metric = f1_metric
         super().__init__(
             task_name=task_name,
             task_description=task_description,
             data_dir=data_dir,
             seed=seed,
             train_size=train_size,
-            eval_size=eval_size,
             test_size=test_size,
-            TaskDataset=TaskDataset,
             benchmark=benchmark,
             **kwargs,
         )
 
         self.task_name = task_name
+
+    def _get_task_initial_prompt(self):
+        base_prompt = "Predict the customer's rating from 1 to 5."
+        suffix = "<Question>{question}</Question>\nAt the end present your answer in <answer> and </answer>."
+        initial_prompt = base_prompt + suffix
+        return initial_prompt, base_prompt, suffix
 
     def clean_response(self, response):
         clean_pattern = r"<answer>([\s\S]*?)<\/answer>"
@@ -62,11 +54,6 @@ class Amazon(BaseTask):
             return int(digits[0])
 
     def cal_metric(self, preds, labels):
-        if self.f1_metric:
-            # Calculating F1 Score, Precision, and Recall
-            f1 = f1_score(labels, preds, average="macro")
-            return f1
-
         correct = self.cal_correct(preds=preds, labels=labels)
         accuracy = np.mean(correct)
 

@@ -1,5 +1,4 @@
 import importlib
-from .base_task import BaseTask
 
 GROUNDING_TASKS = [
     "hotpot_qa",

@@ -1,4 +1,4 @@
-from .base_task import BaseDataset, BaseTask
+from .base_task import BaseTask
 import re
 import string
 from torch.utils.data import DataLoader
@@ -10,14 +10,12 @@ class Grounding(BaseTask):
     def __init__(
         self,
         train_size,
-        eval_size,
         test_size,
         task_name: str,
         benchmark="grounding",
         task_description="grounding tasks",
         data_dir="",
         seed=None,
-        TaskDataset=BaseDataset,
         **kwargs,
     ):
         self.options = {}
@@ -29,13 +27,17 @@ class Grounding(BaseTask):
             data_dir=data_dir,
             seed=seed,
             train_size=train_size,
-            eval_size=eval_size,
             test_size=test_size,
-            TaskDataset=TaskDataset,
             benchmark=benchmark,
             **kwargs,
         )
         self.task_name = task_name
+
+    def _get_task_initial_prompt(self):
+        base_prompt = "Answer the following question based on the given context."
+        suffix = "<Question>{question}</Question>\nRespond with the answer only"
+        initial_prompt = base_prompt + suffix
+        return initial_prompt, base_prompt, suffix
 
     def clean_response(self, response):
         return response
@@ -47,13 +49,24 @@ class Grounding(BaseTask):
 
         return {"question": questions, "answer": answers}
 
-    def build_dataloader(self, dataset, batch_size, shuffle):
-        return DataLoader(
-            dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
+    def _get_data(self, dataset):
+        self.train_dataloader = DataLoader(
+            dataset["train"],
+            batch_size=self.batch_size,
+            shuffle=False,
             collate_fn=self._grounding_coll_func,
         )
+        train_data = next(iter(self.train_dataloader))
+
+        self.test_dataloader = DataLoader(
+            dataset["test"],
+            batch_size=self.batch_size,
+            shuffle=False,
+            collate_fn=self._grounding_coll_func,
+        )
+        test_data = next(iter(self.test_dataloader))
+
+        return train_data, test_data
 
     def cal_correct(self, preds, labels, metric="em"):
         """
@@ -152,8 +165,6 @@ def f1(answers, pred_answers):
             continue
 
         num_all_answers += 1
-        num_correct_answers += max(
-            [compute_f1(gold_answer, pred_answer) for gold_answer in gold_answers]
-        )
+        num_correct_answers += max([compute_f1(gold_answer, pred_answer) for gold_answer in gold_answers])
 
     return num_correct_answers / (num_all_answers + 1e-16)

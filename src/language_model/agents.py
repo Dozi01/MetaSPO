@@ -10,18 +10,14 @@ LANGUAGE_MODELS = {"openai": OpenAIModel, "vllm": VLLM}
 
 
 def get_language_model(language_model_name):
-    assert (
-        language_model_name in LANGUAGE_MODELS.keys()
-    ), f"Language model type {language_model_name} is not supported."
+    assert language_model_name in LANGUAGE_MODELS.keys(), f"Language model type {language_model_name} is not supported."
     return LANGUAGE_MODELS[language_model_name]
 
 
 class BaseModel:
     def __init__(self, base_model_setting: dict, logger):
 
-        self.base_model = get_language_model(base_model_setting["model_type"])(
-            **base_model_setting
-        )
+        self.base_model = get_language_model(base_model_setting["model_type"])(**base_model_setting)
         self._batch_forward_func = self.base_model.batch_forward_func
         self.logger = logger
 
@@ -38,7 +34,7 @@ class BaseModel:
         # Obtaining model responses and processing predictions and labels
         responses = self._batch_forward_func(batch_prompts)
         preds = task.batch_clean_responses(responses)
-        labels = task.clean_labels(batch["answer"])
+        labels = batch["answer"]
 
         # Calculating evaluation metrics
         correct = task.cal_correct(preds=preds, labels=labels)
@@ -96,9 +92,7 @@ class BaseModel:
         forward_log_template = """---------------\tModel Output\t----------------\ntask_name: {task_name}\ncur_prompt:\n{cur_prompt}\nnum_examples: {num_examples}\nmetric: {metric}\n"""
         return forward_log_template
 
-    def _log_debug_info(
-        self, prompts, questions, responses, predictions, labels, correct, num_debug=10
-    ):
+    def _log_debug_info(self, prompts, questions, responses, predictions, labels, correct, num_debug=10):
         for prom, ques, resp, pred, label, corr in zip(
             prompts[:num_debug],
             questions[:num_debug],
@@ -111,9 +105,7 @@ class BaseModel:
                 f"Question: {ques}\nResponses :\n{resp}\nPrediction: {pred} Label: {label} Correct: {corr}\n-----\n"
             )
 
-    def _build_forward_prompts_completion(
-        self, questions, user_prompt, system_prompt=""
-    ):
+    def _build_forward_prompts_completion(self, questions, user_prompt, system_prompt=""):
         prompts = []
 
         for i, question in enumerate(questions):
@@ -132,14 +124,9 @@ class BaseModel:
 
     def _build_prompt_for_gradient(self, batch_prompts):
         if len(batch_prompts[0]) == 1:  # no system prompt
-            return [
-                {"system": "", "user": prompt[0]["content"]} for prompt in batch_prompts
-            ]
+            return [{"system": "", "user": prompt[0]["content"]} for prompt in batch_prompts]
         else:
-            return [
-                {"system": prompt[0]["content"], "user": prompt[1]["content"]}
-                for prompt in batch_prompts
-            ]
+            return [{"system": prompt[0]["content"], "user": prompt[1]["content"]} for prompt in batch_prompts]
 
     def _split_wrong_and_correct_examples(self, forward_output):
         wrong_examples = []
@@ -153,18 +140,14 @@ class BaseModel:
                 correct_examples.append(example)
 
             else:
-                raise ValueError(
-                    f"_get_wrong_examples: invalid correct number {i} {forward_output}."
-                )
+                raise ValueError(f"_get_wrong_examples: invalid correct number {i} {forward_output}.")
 
         return wrong_examples, correct_examples
 
     def get_model_response(self, batch, cur_prompt, task):
         forward_output = self.forward(batch=batch, cur_prompt=cur_prompt, task=task)
 
-        wrong_examples, correct_examples = self._split_wrong_and_correct_examples(
-            forward_output=forward_output
-        )
+        wrong_examples, correct_examples = self._split_wrong_and_correct_examples(forward_output=forward_output)
 
         return (
             wrong_examples,
@@ -180,9 +163,7 @@ class OptimizationModel:
         optim_model_setting,
         logger=None,
     ):
-        self.optim_model = get_language_model(optim_model_setting["model_type"])(
-            **optim_model_setting
-        )
+        self.optim_model = get_language_model(optim_model_setting["model_type"])(**optim_model_setting)
         self.logger = logger
 
     def log_information(self, phase: str, prompt: str, response: str) -> None:
@@ -241,9 +222,7 @@ class OptimizationModel:
             question="{question}",
         )
 
-    def instruction_writer_agent(
-        self, system_prompt: str, instruction: str, examples_string: str
-    ) -> str:
+    def instruction_writer_agent(self, system_prompt: str, instruction: str, examples_string: str) -> str:
         analysis = self._generate_analysis(
             gradient_instruction_writer_system_prompt,
             gradient_for_instruction_writer_template,
@@ -266,15 +245,11 @@ class OptimizationModel:
         optimize_prompt = template.format(**kwargs)
         prompt = self._build_prompt(system_propmt, optimize_prompt)
         response = self.optim_model.generate(prompt)
-        updated_system_prompt = self._clean_response(
-            response, tag_name="improved_system_prompt"
-        )
+        updated_system_prompt = self._clean_response(response, tag_name="improved_system_prompt")
         self.log_information("System", prompt, response)
         return updated_system_prompt
 
-    def system_writer_agent(
-        self, current_system_prompt: str, example_strings: list
-    ) -> str:
+    def system_writer_agent(self, current_system_prompt: str, example_strings: list) -> str:
         analysis = self._generate_analysis(
             gradient_system_writer_system_prompt,
             gradient_for_system_writer_template,

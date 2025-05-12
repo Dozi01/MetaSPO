@@ -1,5 +1,5 @@
 # define task prompts for various datasets
-from .base_task import BaseDataset, BaseTask
+from .base_task import BaseTask
 import re
 import string
 import json
@@ -13,37 +13,69 @@ TASKS_ANSWER_IS_OPTION = [
 ]
 
 
+INITIAL_PROMPTS = {
+    "logic_grid_puzzle": {
+        "base_prompt": "Solve logic grid puzzles",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer bracketed between <answer> and </answer>.",
+    },
+    "logical_deduction": {
+        "base_prompt": "A logical deduction task which requires deducing the order of a sequence of objects.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer option bracketed between <answer> and </answer>.",
+    },
+    "object_counting": {
+        "base_prompt": "Questions that involve enumerating objects and asking the model to count them.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer bracketed between <answer> and </answer>.",
+    },
+    "reasoning_colored_objects": {
+        "base_prompt": "Answer extremely simple questions about the colors of objects on a surface.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer bracketed between <answer> and </answer>.",
+    },
+    "temporal_sequences": {
+        "base_prompt": "Answer questions about which times certain events could have occurred.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer option bracketed between <answer> and </answer>.",
+    },
+    "tracking_shuffled_objects": {
+        "base_prompt": "A task requiring determining the final positions of a set of objects given their initial positions and a description of a sequence of swaps.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer option bracketed between <answer> and </answer>.",
+    },
+    "epistemic": {
+        "base_prompt": "Determine whether one sentence entails the next.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer option bracketed between <answer> and </answer>.",
+    },
+    "navigate": {
+        "base_prompt": "Given a series of navigation instructions, determine whether one would end up back at the starting point.",
+        "suffix": "<Question>{question}</Question>\nAt the end show the answer option bracketed between <answer> and </answer>.",
+    },
+}
+
+
 class Bigbench(BaseTask):
     def __init__(
         self,
         train_size,
-        eval_size,
         test_size,
         task_name: str,
         benchmark="bigbench",
         task_description="task from bigbench",
         data_dir="",
         seed=None,
-        TaskDataset=BaseDataset,
         option_num=7,
         **kwargs,
     ):
-        self.options = {}
         self.benchmark = benchmark
-
         super().__init__(
             task_name=task_name,
             task_description=task_description,
             data_dir=data_dir,
             seed=seed,
             train_size=train_size,
-            eval_size=eval_size,
             test_size=test_size,
-            TaskDataset=TaskDataset,
             option_num=option_num,
             benchmark=benchmark,
             **kwargs,
         )
+
+        self.option_num = option_num
 
         self.task_name = task_name
 
@@ -82,6 +114,12 @@ class Bigbench(BaseTask):
             data = json.load(file)
 
         return data
+
+    def _get_task_initial_prompt(self):
+        base_prompt = INITIAL_PROMPTS[self.task_name]["base_prompt"]
+        suffix = INITIAL_PROMPTS[self.task_name]["suffix"]
+        initial_prompt = base_prompt + suffix
+        return initial_prompt, base_prompt, suffix
 
     def clean_response(self, response):
         if self.task_name in TASKS_ANSWER_IS_OPTION:
