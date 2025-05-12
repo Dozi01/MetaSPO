@@ -7,7 +7,6 @@ datasets
 openai
 pytz
 transformers
-matplotlib
-ctranslate2
 scikit-learn
 vllm
+python-dotenv

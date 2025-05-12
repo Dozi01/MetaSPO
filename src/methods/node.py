@@ -76,7 +76,7 @@ class Node:
         return "\n".join(example_strings)
 
     def _get_example_template(self):
-        example_template = """<Example>\nSystem prompt: \n{system_prompt}\n\nUser prompt:\n{user_prompt}\n\nResponse: \n{response}\n\nPrediction: \n{prediction}\n\nThe correct label is : \n{label}\n</Example>""".strip()
+        example_template = """<Example>\nSystem prompt:\n{system_prompt}\n\nUser prompt:\n{user_prompt}\n\nResponse:\n{response}\n\nPrediction:\n{prediction}\n\nThe correct label is :\n{label}\n</Example>""".strip()
         return example_template
 
     def to_dict(self):

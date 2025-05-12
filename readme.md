@@ -47,5 +47,12 @@ python meta_test.py \
 ```
 
 ## Configuration
-Modify `configs/$DOMAIN.yaml` to set dataset configurations
-Modify `configs/base_config.yaml` to set hyperparameters, and training settings.
+Modify `configs/$DOMAIN.yaml` to set dataset configurations. \
+
+'''
+    "ethos":{
+        "cot_prompt" : "",
+        "human_prompt" : "Is the following text hate speech?",
+        "suffix" : "<Question>{question}</Question>\nAt the end present your answer in <answer>yes</answer> or <answer>no</answer>."
+    },
+'''

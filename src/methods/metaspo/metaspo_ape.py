@@ -16,22 +16,22 @@ class MetaSPOAPE(MetaSPO):
         log_dir,
         logger,
         method: str,
-        num_candidate=9,
+        system_num_candidate=18,
+        user_num_candidate=3,
         iteration=3,
-        beam_width=3,
         **kwargs,
     ) -> None:
         super().__init__(
-            initial_system_prompt,
-            task_manager,
-            base_model,
-            optim_model,
-            log_dir,
-            logger,
-            method,
-            iteration,
-            num_candidate,
-            beam_width,
+            initial_system_prompt=initial_system_prompt,
+            task_manager=task_manager,
+            base_model=base_model,
+            optim_model=optim_model,
+            log_dir=log_dir,
+            logger=logger,
+            method=method,
+            iteration=iteration,
+            system_num_candidate=system_num_candidate,
+            user_num_candidate=user_num_candidate,
             **kwargs,
         )
 
@@ -46,21 +46,13 @@ class MetaSPOAPE(MetaSPO):
         self.all_greater = False
         self.beam_cut = True
         self.iteration = iteration
-        self.beam_width = beam_width
         self.log_dir = log_dir
 
         self.train_log = list()
         self.test_log = list()
 
     def train(self):
-        method_mapping = {
-            "metaspo_ape": self.method_metaspo_ape,
-        }
-        method_func = method_mapping.get(self.method)
-        if method_func:
-            method_func()
-        else:
-            self.logger.error(f"Unknown method: {self.method}")
+        self.method_metaspo_ape()
 
     def method_metaspo_ape(self):
         self.run_meta_training(

@@ -1,47 +1,36 @@
 import os
 import time
 from datetime import timedelta
-from typing import Optional
 import json
 from .methods import *
 from .utils import get_pacific_time, create_logger
 from .language_model import BaseModel, OptimizationModel
 from .taskmanager import TaskManager
-from .methods.node import Node
 
 OPTIMIZE_METHOD_DICT = {
     "metaspo": MetaSPO,
+    "metaspo_ape": MetaSPOAPE,
     "outer_loop": MetaSPO,
     "unseen_generalization": MetaSPO,  # for unseen generalization, dummy method MetaSPO is used
-    "metaspo_ape": MetaSPOAPE,
+    "test_time_adaptation": ProTeGi,  # for test time adaptation
     "ape": APE,
-    "apo": APO,
+    "protegi": ProTeGi,
 }
 
 
 class Runner:
-    def __init__(
-        self,
-        log_dir: str,
-        meta_train_tasks: list[str],
-        meta_test_tasks: list[str],
-        task_setting: dict,
-        base_model_setting: dict,
-        optim_model_setting: dict,
-        search_setting: dict,
-        init_system_prompt_path: Optional[str],
-        **kwargs,
-    ) -> None:
+    def __init__(self, args):
 
         # Load initial system prompt from file
-        init_system_prompt = self.get_system_prompt(init_system_prompt_path)
-
+        self.init_system_prompt = self.get_system_prompt(args.init_system_prompt_path)
         exp_name = f'{get_pacific_time().strftime("%Y%m%d_%H%M%S")}'
 
-        self.log_dir = os.path.join(log_dir, exp_name)
+        self.log_dir = os.path.join(args.log_dir, exp_name)
         self.logger = create_logger(self.log_dir)
 
-        self.task_manager = TaskManager(meta_train_tasks, meta_test_tasks, task_setting)
+        search_setting, base_model_setting, optim_model_setting, task_setting = self.parse_args(args)
+
+        self.task_manager = TaskManager(args.meta_train_tasks, args.meta_test_tasks, task_setting)
 
         # Initialize base model and optimization model
         self.base_model = BaseModel(base_model_setting, self.logger)
@@ -52,7 +41,7 @@ class Runner:
             task_manager=self.task_manager,
             base_model=self.base_model,
             optim_model=self.optim_model,
-            initial_system_prompt=init_system_prompt,
+            initial_system_prompt=self.init_system_prompt,
             log_dir=self.log_dir,
             logger=self.logger,
             **search_setting,
@@ -62,25 +51,21 @@ class Runner:
         self.logger.info(f"optim_model_setting : {optim_model_setting}")
         self.logger.info(f"search_setting : {search_setting}")
         self.logger.info(f"task_setting : {task_setting}")
-        self.logger.info(f"meta_train_tasks : {meta_train_tasks}")
-        self.logger.info(f"meta_test_tasks : {meta_test_tasks}")
-        self.logger.info(f"init_system_prompt_path : {init_system_prompt_path}")
-        self.logger.info(f"init_system_prompt : {init_system_prompt}")
+        self.logger.info(f"meta_train_tasks : {args.meta_train_tasks}")
+        self.logger.info(f"meta_test_tasks : {args.meta_test_tasks}")
+        self.logger.info(f"init_system_prompt_path : {args.init_system_prompt_path}")
+        self.logger.info(f"init_system_prompt : {self.init_system_prompt}")
 
     def meta_train(self):
         """
         Start searching from initial prompt
         """
         start_time = time.time()
-        self.optimized_system_prompt = self.optim_method.train()
-        meta_train_time = time.time()
+        self.optim_method.train()
         end_time = time.time()
 
-        meta_train_time = str(timedelta(seconds=meta_train_time - start_time)).split(".")[0]
-        self.logger.info(f"optimized_system_prompt :\n{self.optimized_system_prompt}")
-        self.logger.info(f"\nDone!Meta Train time: {meta_train_time}")
         exe_time = str(timedelta(seconds=end_time - start_time)).split(".")[0]
-        self.logger.info(f"\nDone!Excution time: {exe_time}")
+        self.logger.info(f"\nExcution time: {exe_time}")
         return
 
     def get_system_prompt(self, file_path):
@@ -89,13 +74,42 @@ class Runner:
                 data = json.load(json_file)
                 file_name = os.path.basename(file_path)
                 if "bilevel_nodes" in file_name:
-                    if isinstance(data[-1][-1], dict) and "system_prompt" in data[-1][-1]:
-                        system_prompt = data[-1][-1]["system_prompt"]
-                    elif isinstance(data[-1][-1][-1], dict) and "system_prompt" in data[-1][-1][-1]:
-                        system_prompt = data[-1][-1][-1]["system_prompt"]
+                    system_prompt = data['optimized_system_prompt']
                 else:
                     system_prompt = data["prompt"]
 
                 return system_prompt
         except FileNotFoundError:
             raise FileNotFoundError(f"The file at '{file_path}' does not exist.")
+
+    def parse_args(self, args):
+        search_setting = {
+            "method": args.method,
+            "iteration": args.iteration,
+            "num_system_candidate": args.num_system_candidate,
+            "num_user_candidate": args.num_user_candidate,
+            "user_top_k": args.user_top_k,
+        }
+
+        base_model_setting = {
+            "model_type": args.base_model_type,
+            "model_name": args.base_model_name,
+            "temperature": args.base_model_temperature,
+            "api_key": args.openai_api_key,
+        }
+
+        optim_model_setting = {
+            "model_type": args.optim_model_type,
+            "model_name": args.optim_model_name,
+            "temperature": args.optim_model_temperature,
+            "api_key": args.openai_api_key,
+        }
+
+        task_setting = {
+            "train_size": args.train_size,
+            "test_size": args.test_size,
+            "seed": args.seed,
+            "data_dir": args.dataset_dir,
+        }
+
+        return search_setting, base_model_setting, optim_model_setting, task_setting

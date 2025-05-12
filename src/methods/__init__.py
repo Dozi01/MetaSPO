@@ -1,2 +1,2 @@
-from .unilevel import APE, APO
+from .unilevel import APE, ProTeGi
 from .metaspo import MetaSPO, MetaSPOAPE
