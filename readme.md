@@ -32,6 +32,7 @@ To implement new tasks, include the task name in `srt/tasks/__init__.py` and imp
 
 ## 📜 Citation
 If you find this work useful, please cite our paper:
+```
 @article{choi2025promptoptimizationmetalearning,
       title={System Prompt Optimization with Meta-Learning}, 
       author={Yumin Choi and Jinheon Baek and Sung Ju Hwang},
@@ -40,3 +41,4 @@ If you find this work useful, please cite our paper:
       primaryClass={cs.CL},
       url={https://arxiv.org/abs/2505.09666}, 
 }
+```
